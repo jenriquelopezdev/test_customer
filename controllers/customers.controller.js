@@ -37,4 +37,57 @@ const customerSchemaUpdate = Joi.object({
   phone: Joi.number().integer()
 });
 
-module.exports = {};
+module.exports = {
+  insert,
+  getCustomers,
+  getById,
+  updateById,
+  deleteById
+};
+
+async function insert(customer) {
+  try {
+    customer = await Joi.validate(customer, customerSchema, {
+      abortEarly: false
+    });
+    return await Customers.create(customer);
+  } catch (err) {
+    return {
+      error: err.message
+    };
+  }
+}
+
+async function getCustomers() {
+  return await Customers.findAll();
+}
+
+async function getById(id) {
+  return await Customers.findOne({
+    where: {
+      id: id
+    }
+  });
+}
+
+async function updateById(id, customer) {
+  try {
+    customer = await Joi.validate(customer, customerSchemaUpdate, {
+      abortEarly: false
+    });
+    return await Customers.update(customer, { where: { id: id } });
+  } catch (err) {
+    return {
+      error: err.message
+    };
+  }ß
+}
+
+async function deleteById(id) {
+  const customer = await Customers.findOne({
+    where: {
+      id: id
+    }
+  });
+  return await customer.destroy();
+}
