@@ -1,5 +1,7 @@
 const Joi = require("@hapi/joi");
 const Sales = require("../models/sales.model");
+const Product = require("../models/products.model");
+const ProductsCtr = require("../controllers/products.controller");
 
 const saleSchema = Joi.object({
   customer_id: Joi.number()
@@ -23,6 +25,8 @@ module.exports = {
   insert,
   getSales,
   getById,
+  getByProduct,
+  getByCustomer,
   updateById,
   deleteById
 };
@@ -32,6 +36,15 @@ async function insert(sale) {
     sale = await Joi.validate(sale, saleSchema, {
       abortEarly: false
     });
+    const stock = await ProductsCtr.getStockById(sale.product_id);
+    if (stock.dataValues.stock >= sale.quantity) {
+      const stockNew = stock.dataValues.stock - sale.quantity;
+      await ProductsCtr.updateById(sale.product_id, { stock: stockNew });
+    } else {
+      return {
+        error: "No products in stock."
+      };
+    }
     return await Sales.create(sale);
   } catch (err) {
     if (err.original.code != null) {
@@ -47,14 +60,40 @@ async function insert(sale) {
 }
 
 async function getSales() {
-  return await Sales.findAll();
+  try {
+    return await Sales.findAll({
+      order: [["id", "ASC"]],
+      include: [{ all: true, nested: true }]
+    });
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 async function getById(id) {
   return await Sales.findOne({
     where: {
       id: id
-    }
+    },
+    include: [{ all: true, nested: true }]
+  });
+}
+
+async function getByProduct(product_id) {
+  return await Sales.findOne({
+    where: {
+      product_id: product_id
+    },
+    include: [{ all: true, nested: true }]
+  });
+}
+
+async function getByCustomer(customer_id) {
+  return await Sales.findOne({
+    where: {
+      customer_id: customer_id
+    },
+    include: [{ all: true, nested: true }]
   });
 }
 

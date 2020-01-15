@@ -43,7 +43,8 @@ module.exports = {
   getProducts,
   getById,
   updateById,
-  deleteById
+  deleteById,
+  getStockById
 };
 
 async function insert(product) {
@@ -92,4 +93,13 @@ async function deleteById(id) {
     }
   });
   return await product.destroy();
+}
+
+async function getStockById(id) {
+  return await Products.findOne({
+    where: {
+      id: id
+    },
+    attributes: ["stock"]
+  });
 }
