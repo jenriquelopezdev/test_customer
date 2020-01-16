@@ -15,6 +15,8 @@ router
   .put(asyncHandler(updateById))
   .delete(asyncHandler(deleteById));
 
+router.route("/customer/:id").get(asyncHandler(getByIdCustomer));
+
 async function insert(req, res) {
   try {
     let sales = await salesCtrl.insert(req.body);
@@ -47,6 +49,21 @@ async function getById(req, res) {
       res.json(sales);
     }
   } catch (err) {
+    res.boom.badRequest("The record was not found.");
+  }
+}
+
+async function getByIdCustomer(req, res) {
+  try {
+    let id = req.params.id;
+    let sales = await salesCtrl.getByCustomer(id);
+    if (sales == null) {
+      res.boom.badRequest("The record was not found.");
+    } else {
+      res.json(sales);
+    }
+  } catch (err) {
+    console.log(err);
     res.boom.badRequest("The record was not found.");
   }
 }
