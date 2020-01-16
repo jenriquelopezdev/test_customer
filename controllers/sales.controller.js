@@ -80,7 +80,7 @@ async function getById(id) {
 }
 
 async function getByProduct(product_id) {
-  return await Sales.findOne({
+  return await Sales.findAll({
     where: {
       product_id: product_id
     },
@@ -89,7 +89,7 @@ async function getByProduct(product_id) {
 }
 
 async function getByCustomer(customer_id) {
-  return await Sales.findOne({
+  return await Sales.findAll({
     where: {
       customer_id: customer_id
     },
